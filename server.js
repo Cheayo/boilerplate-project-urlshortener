@@ -34,17 +34,23 @@ app.get('/api/shorturl/:urlkey', function(req, res) {
 });
 
 app.post('/api/shorturl', function(req, res) {
-  let hostname = req.body.url.split('/')[2]
-  
-  dns.lookup(hostname, function(err, address, family) {
-    if(err) {
-      res.json({error: 'invalid url'});
-    } else {
-      let shorturl = urllist.push(req.body.url)
+  let urlSplit = req.body.url.toLowerCase().split('/');
 
-      res.json({original_url: req.body.url, short_url: shorturl});
-    }
-  })
+  if (urlSplit.length >= 3) {
+    let hostname = urlSplit[2];
+    
+    dns.lookup(hostname, function(err, address, family) {
+      if(err) {
+        res.json({error: 'invalid url'});
+      } else {
+        let shorturl = (urllist.push(req.body.url)) - 1;
+
+        res.json({original_url: req.body.url, short_url: shorturl});
+      }
+    });
+  } else {
+    res.json({error: 'invalid url'});
+  }
 });
 
 
